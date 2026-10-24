@@ -244,7 +244,7 @@
             var input = document.createElement('input');
             input.type = 'text';
             input.className = 'focusable discover-search';
-            input.placeholder = _dv.cat.__people ? '🔍  Search a name' : '🔍  Search';
+            input.placeholder = _dv.cat.__people ? 'Search a name' : 'Search';
             input.value = _dv.query || '';
             input.__onselect = function () { input.focus(); };
             var apply = function () { setQuery(input.value); };

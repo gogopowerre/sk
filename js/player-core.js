@@ -727,7 +727,7 @@ var PlayerParts = {};
 
     // The desktop's <video> has no start timeout of its own (AVPlay's prepare does): a
     // stream the browser never gets going would leave the spinner up for good.
-    var HTML5_START_MS = 20000;
+    var HTML5_START_MS = 300000;
     function startHTML5(url) {
         url = opened(url);
         var token = ++_playToken, loaded = false;
