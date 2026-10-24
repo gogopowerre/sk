@@ -169,9 +169,39 @@
         var bgs = { dark: 1, black: 1, gray: 1, white: 1 };
         return { accent: ACCENT_NAMES[accent] ? accent : 'indigo', bg: bgs[bg] ? bg : 'dark' };
     }
+    var UI_SCALES = [['1', '100% (smallest)'], ['1.1', '110%'], ['1.2', '120%'], ['1.3', '130%'], ['1.4', '140%']];
+    function uiScale() {
+        var v = +Stremio.getPrefs().uiScale;
+        return v >= 1 && v <= 1.4 ? v : 1;
+    }
+    // The whole UI (screens, text, posters) is drawn on a 1920x1080 canvas: a scale shrinks that
+    // canvas and magnifies it back to the screen. The player is outside #app, so it stays as it is.
+    function applyUiScale() {
+        var scale = uiScale();
+        var app = document.getElementById('app');
+        if (!app) { return; }
+        var w = Math.round(1920 / scale), h = Math.round(1080 / scale);
+        app.style.width = w + 'px';
+        app.style.height = h + 'px';
+        app.style.zoom = scale;
+        var screens = app.querySelectorAll('.screen');
+        for (var i = 0; i < screens.length; i++) {
+            screens[i].style.width = w + 'px';
+            screens[i].style.height = h + 'px';
+        }
+        window.__stremiokUiScale = scale;
+        var style = document.getElementById('ui-scale-style');
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'ui-scale-style';
+            document.head.appendChild(style);
+        }
+        style.textContent = '.modal-overlay{width:' + w + 'px;height:' + h + 'px;zoom:' + scale + ';}' + (scale >= 1.4 ? ' #app .brand{display:none;}' : '');
+    }
     function applyAppearance() {
         var a = appearance();
         U.applyTheme(a.accent, a.bg);
+        applyUiScale();
     }
     function settingsAppearance(wrap) {
         var store = { get: appearance, set: function (cfg) {
@@ -183,6 +213,15 @@
         wrap.appendChild(U.el('h2', null, 'Appearance'));
         wrap.appendChild(subPickRow('Background', BACKGROUNDS, 'bg', store));
         wrap.appendChild(subPickRow('Accent color', accents, 'accent', store));
+        wrap.appendChild(subPickRow('UI scale', UI_SCALES, 'uiScale', {
+            get: function () { return { uiScale: '' + uiScale() }; },
+            set: function (cfg) {
+                var v = parseFloat(cfg.uiScale);
+                Stremio.setPref('uiScale', [1, 1.1, 1.2, 1.3, 1.4].indexOf(v) !== -1 ? v : 1);
+                applyUiScale();
+                markHomeDirty();
+            }
+        }));
         wrap.appendChild(subPickRow('Poster orientation', POSTER_SHAPES, 'posterShape', {
             get: function () { return { posterShape: Stremio.getPrefs().posterShape }; },
             set: function (cfg) { Stremio.setPref('posterShape', cfg.posterShape); markHomeDirty(); }   // Home redraws on return
@@ -422,7 +461,7 @@
         wrap.appendChild(U.el('h2', null, 'Settings'));
         wrap.appendChild(sectionRow('Content', 'Addons, API keys, IPTV playlists, streaming apps, importing a configuration file', 'content'));
         wrap.appendChild(sectionRow('Playback', 'Audio and subtitles, source ranking, feed sources, formats', 'playback'));
-        wrap.appendChild(sectionRow('Appearance', 'Background, accent color, poster orientation, Home feeds, Search results', 'appearance'));
+        wrap.appendChild(sectionRow('Appearance', 'Background, accent color, UI scale, poster orientation, Home feeds, Search results', 'appearance'));
         wrap.appendChild(sectionRow('Diagnostics', 'Logs, storage, installed apps; how StremioK was installed', 'diagnostics'));
         if (typeof YTPlay !== 'undefined' && YTPlay.installMode && YTPlay.installMode() === 'tizenbrew') { wrap.appendChild(U.el('div', 'hint', TIZENBREW_NOTE)); }
         focusBack(wrap);

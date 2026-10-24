@@ -49,15 +49,16 @@ var Focus = (function () {
             if (canX || canY) {
                 var pr = p.getBoundingClientRect();
                 var nr = node.getBoundingClientRect();
+                var z = (window.__stremiokUiScale || 1);
                 if (canX) {
-                    var mx = 90;
-                    if (nr.left < pr.left + mx) { p.scrollLeft -= (pr.left + mx - nr.left); }
-                    else if (nr.right > pr.right - mx) { p.scrollLeft += (nr.right - (pr.right - mx)); }
+                    var mx = 90 * z;
+                    if (nr.left < pr.left + mx) { p.scrollLeft -= (pr.left + mx - nr.left) / z; }
+                    else if (nr.right > pr.right - mx) { p.scrollLeft += (nr.right - (pr.right - mx)) / z; }
                 }
                 if (canY) {
-                    var my = 70;
-                    if (nr.top < pr.top + my) { p.scrollTop -= (pr.top + my - nr.top); }
-                    else if (nr.bottom > pr.bottom - my) { p.scrollTop += (nr.bottom - (pr.bottom - my)); }
+                    var my = 70 * z;
+                    if (nr.top < pr.top + my) { p.scrollTop -= (pr.top + my - nr.top) / z; }
+                    else if (nr.bottom > pr.bottom - my) { p.scrollTop += (nr.bottom - (pr.bottom - my)) / z; }
                 }
             }
             p = p.parentNode;

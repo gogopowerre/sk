@@ -163,6 +163,7 @@ var Stremio = (function () {
     function getPrefs() {
         var p = U.store.get(PREFS_KEY, {}) || {};
         return { posterShape: p.posterShape || 'portrait', accent: p.accent || 'indigo', bg: p.bg || 'dark',
+            uiScale: [1, 1.1, 1.2, 1.3, 1.4].indexOf(+p.uiScale) !== -1 ? +p.uiScale : 1,   // Settings > Appearance: the whole UI's size (1 = 100%)
             formatsAuto: p.formatsAuto !== false,   // Settings > Formats: mark "Not working" on its own
             allowLocal: p.allowLocal === true,      // Settings > Addons: home-network links from internet addons
             addonWait: ADDON_WAITS.indexOf(p.addonWait) !== -1 ? p.addonWait : 0,   // Settings > Addons: seconds to wait for an addon (0: Normal)
