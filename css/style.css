@@ -540,3 +540,40 @@ html, body {
 .home-info-pic.hidden { display: none; }
 #osd-clock { position: fixed; top: 40px; right: 60px; font-size: 34px; font-weight: bold; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.9); }   /* (the time of day, top right, while the bar shows) */
 #osd-clock:empty { display: none; }
+
+.tab-pill, .header .hchip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    font-size: 22px;
+    font-weight: 600;
+    padding: 10px 14px;
+    margin-right: 6px;
+    border-radius: 10px;
+    background: transparent;
+    color: #9aa3b5;
+    border: 2px solid transparent;
+    white-space: nowrap;
+}
+.tab-ic { display: none; }
+.tab-pill.active, .home-header .hchip.active {
+    background: transparent;
+    color: #fff;
+}
+.tab-pill.active::after, .home-header .hchip.active::after {
+    content: '';
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 2px;
+    height: 3px;
+    border-radius: 3px;
+    background: #818cf8;
+}
+.tab-pill.focusable.focused, .header .hchip.focusable.focused {
+    background: #1a1f2b;
+    color: #fff;
+    border-color: transparent;
+    box-shadow: inset 0 0 0 2px #a5b4fc;
+    opacity: 1;
+}
