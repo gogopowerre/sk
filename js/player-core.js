@@ -1005,7 +1005,7 @@ var PlayerParts = {};
     // next source on (the default), the next best one this playback hasn't tried (the title's
     // page picks it: ctx.nextSource), at the same place, NEXT_TRIES more at most. Not for live
     // channels, YouTube or a USB file.
-    var NEXT_TRIES = 3, AV_START_MS = 45000, _openedAt = 0;
+    var NEXT_TRIES = 3, AV_START_MS = 300000, _openedAt = 0;
     function nextSourceOnFail(notice) {
         var c = S.ctx;
         if (!c || !S.active || S.playing || S.isLive || c.trailer || c.yt || c.localFile || !c.stream || typeof c.nextSource !== 'function') { return false; }
