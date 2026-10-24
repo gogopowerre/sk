@@ -774,6 +774,7 @@ var Stremio = (function () {
     // whether sources played before go first. Stored as { order: [keys], off: [keys], played }.
     var RANKING_KEY = 'stremiok.ranking';
     var RANK_CRITERIA = [
+        ['seeds', 'Seeders (high to low)', 'the most seeders first (read from the source\'s name or title, e.g. Torrentio)'],
         ['res', 'Resolution (high to low)', '4K, 1440p, 1080p, 720p, SD, then unknown; at the top, the sources are grouped by resolution'],
         ['uncached', 'Not yet cached last', 'sources an addon marks as not cached on your debrid service yet (they can’t start right away)'],
         ['kind', 'Release type', 'remux > Blu-ray > web > unknown > TV rip, CAM rips far below'],

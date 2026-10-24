@@ -1389,8 +1389,19 @@
     function tierOf(info) {
         return info.res >= 2160 ? '2160' : info.res >= 1440 ? '1440' : info.res >= 1080 ? '1080' : info.res >= 720 ? '720' : info.res > 0 ? 'sd' : 'other';
     }
+    // Seeders from the source's own text (Torrentio: its seeders glyph, then the count), as
+    // UTF-16 escapes for old Tizen.
+    function seedersOf(st) {
+        var text = '' + ((st && st.title) || '') + ' ' + ((st && st.description) || '');
+        var m = text.match(/(?:\uD83D\uDC64|\uD83D\uDC65)\s*([\d.,]+)/) ||
+            text.match(/(?:seeders?|seeds)\s*[:=]\s*(\d+)/i);
+        if (!m) { return -1; }
+        var n = Number(('' + m[1]).replace(/[.,]/g, ''));
+        return isFinite(n) ? n : -1;
+    }
     // How two sources compare on one criterion (Settings > Source ranking), <0: a first.
     var RANK_CMP = {
+        seeds: function (a, b) { return (b.seeds || 0) - (a.seeds || 0); },
         res: function (a, b) { return TIERS.indexOf(a.tier) - TIERS.indexOf(b.tier); },
         uncached: function (a, b) { return (a.info.cache === -1 ? 1 : 0) - (b.info.cache === -1 ? 1 : 0); },
         kind: function (a, b) { return (KIND_SCORE[b.info.kind] || 0) - (KIND_SCORE[a.info.kind] || 0); },
@@ -1419,7 +1430,7 @@
             var pr = (usable && !unsuitable && !worded && !sized && !bad.length && !blocked) ? playedIndex(hist, st, info) : -1;
             var group = !usable ? 'where' : unsuitable ? 'unsuitable' : worded ? 'worded' : sized ? 'sized' : (bad.length || blocked) ? 'bad' : st._localFile ? 'local' : pr >= 0 ? 'played' : byRes ? tierOf(info) : 'ranked';
             var app = group === 'where' ? whereApp(st) : null;   // links that open an app here come first
-            return { st: st, i: i, info: info, bad: bad, blocked: blocked, pr: pr, group: group, tier: tierOf(info), app: app, unsuitable: unsuitable, worded: worded, sized: sized };
+            return { st: st, i: i, info: info, bad: bad, blocked: blocked, pr: pr, group: group, tier: tierOf(info), app: app, unsuitable: unsuitable, worded: worded, sized: sized, seeds: seedersOf(st) };
         });
         rows.sort(function (a, b) {
             var ga = GROUPS.indexOf(a.group), gb = GROUPS.indexOf(b.group);
