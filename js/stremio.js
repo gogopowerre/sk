@@ -147,12 +147,13 @@ var Stremio = (function () {
     function getIntegrations() {
         var o = U.store.get(INTEG_KEY, {}) || {};
         return { omdb: o.omdb || '', tmdb: o.tmdb || '', mdblist: o.mdblist || '', theintrodb: o.theintrodb || '',
-            trakt_id: o.trakt_id || '', trakt_secret: o.trakt_secret || '' };
+            server: o.server || '', trakt_id: o.trakt_id || '', trakt_secret: o.trakt_secret || '' };
     }
     function setIntegration(key, val) {
         var o = U.store.get(INTEG_KEY, {}) || {};   // preserve any keys getIntegrations doesn't surface
         o[key] = ('' + val).trim();
         U.store.set(INTEG_KEY, o);
+        if (key === 'server') { _streamCache = {}; _streamOrder = []; }
     }
 
     // Settings > Addons > Wait for addons: at least this long for every addon request (an addon
@@ -1827,13 +1828,24 @@ var Stremio = (function () {
     // ranks like any source and plays through StremioK's YouTube service (as trailers do).
     // Returns the source (changed in place when it is one).
     var YT_ID = /^[A-Za-z0-9_-]{11}$/;
+    function bridgeStream(s) {
+        if (!s || s.url || typeof s.infoHash !== 'string') { return s; }
+        var base = ('' + (getIntegrations().server || '')).trim();
+        if (!/^https?:\/\//i.test(base)) { return s; }
+        if (!/^[a-f0-9]{32,64}$/i.test(s.infoHash)) { return s; }
+        var query = '', at = base.indexOf('?');
+        if (at >= 0) { query = base.slice(at); base = base.slice(0, at); }
+        s.url = base.replace(/\/+$/, '') + '/' + s.infoHash.toLowerCase() + '/' + (s.fileIdx || 0) + query;
+        s._bridged = true;
+        return s;
+    }
     function youTubeSource(s) {
         if (s && !s.url && typeof s.ytId === 'string' && YT_ID.test(s.ytId)) {
             s.url = 'https://www.youtube.com/watch?v=' + s.ytId;
             s._yt = true;
             s.ytPage = s.url;
         }
-        return s;
+        return bridgeStream(s);
     }
 
     // A stream is directly playable on the TV only if it exposes an http(s) URL.

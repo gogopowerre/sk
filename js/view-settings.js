@@ -314,7 +314,7 @@
     var SETTINGS_GROUPS = {
         content: { title: 'Content', rows: [
             ['Addons', 'Catalog, stream & subtitle addons', 'addons'],
-            ['Integrations', 'API keys (OMDb, TMDB, MDBList), where-to-watch country', 'integrations'],
+            ['Integrations', 'API keys (OMDb, TMDB, MDBList), the streaming server, where-to-watch country', 'integrations'],
             ['IPTV', 'Manage M3U playlist URLs', 'iptv'],
             ['YouTube', 'Your YouTube channels, playlists and searches; YouTube in Search', 'youtube'],
             ['Streaming apps', 'Your apps (Prime Video, Netflix, …) that open a title\'s "where to watch" sources', 'appshortcuts'],
@@ -1236,12 +1236,41 @@
         return r;
     }
 
+    function serverRow() {
+        var val = Stremio.getIntegrations().server || '';
+        var r = U.el('div', 'addon-item focusable');
+        r.appendChild(U.el('div', 'a-name', 'Streaming server URL'));
+        r.appendChild(U.el('div', 'a-url', val ? ('Set - ' + maskKey(val)) : 'Not set - press OK to enter'));
+        r.__onselect = function () {
+            App.openEntry({
+                title: 'Streaming server URL',
+                hint: 'Paste the streaming server base URL (for example http://192.168.1.50:11470), then Confirm. ' +
+                    'Torrent sources play through it. Leave blank and Confirm to clear. Stored on this TV only.',
+                value: val,
+                placeholder: 'https://...',
+                validate: function (v) {
+                    if (!v) { return null; }
+                    return /^https?:\/\//i.test(v) ? null : 'Use an http(s) URL';
+                },
+                phone: 'server',
+                onConfirm: function (v) {
+                    Stremio.setIntegration('server', v.replace(/\/+$/, ''));
+                    U.toast(v ? 'Saved' : 'Cleared');
+                    App.back();
+                    renderSettings();
+                }
+            });
+        };
+        return r;
+    }
+
     function settingsIntegrations(wrap) {
         wrap.appendChild(U.el('h2', null, 'Integrations'));
         if (typeof YTPlay !== 'undefined' && YTPlay.installMode && YTPlay.installMode() === 'tizenbrew') { wrap.appendChild(U.el('div', 'hint', TIZENBREW_NOTE)); }
         wrap.appendChild(keyRow('OMDb API key', 'omdb', 'OMDb API key', Stremio.omdbValidate));
         wrap.appendChild(keyRow('TMDB API key (v3)', 'tmdb', 'TMDB v3 API key', Stremio.tmdbValidate));
         wrap.appendChild(keyRow('MDBList API key', 'mdblist', 'MDBList API key', Stremio.mdblistValidate));
+        wrap.appendChild(serverRow());
         if (Stremio.autoWatchRegion) { wrap.appendChild(regionRow()); }
 
         // Trakt: your account (StremioK is the Trakt app: nothing to set up)
@@ -1254,7 +1283,7 @@
         }
 
         wrap.appendChild(U.el('div', 'hint',
-            'Keys are stored on this TV only. OMDb gives real IMDb per-episode ratings (used first when set); TMDB adds episode images & ratings.'));
+            'Keys and the streaming server URL are stored on this TV only. OMDb gives real IMDb per-episode ratings (used first when set); TMDB adds episode images & ratings.'));
         focusSettings();
     }
 
