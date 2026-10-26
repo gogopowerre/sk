@@ -1491,7 +1491,6 @@
         if (r.info.hdr === 'dv' || r.info.hdr === 'dv-only') { bits.push('Dolby Vision'); }
         else if (r.info.hdr) { bits.push('HDR'); }
         var out = bits.join(' ');
-        if (r.info.cache > 0) { out += ' ⚡'; }
         if (r.group === 'played') { out += '  ·  played before'; }
         return out;
     }
