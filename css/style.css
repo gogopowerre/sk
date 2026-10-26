@@ -577,3 +577,4 @@ html, body {
     box-shadow: inset 0 0 0 2px #a5b4fc;
     opacity: 1;
 }
+#osd-hint { display: none; }
