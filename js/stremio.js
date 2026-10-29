@@ -1144,12 +1144,17 @@ var Stremio = (function () {
         }
         return loadAddons().then(function (addons) {
             var providers = addons.filter(function (a) { return supports(a, 'subtitles', type, id); });
-            var tasks = providers.map(function (a) {
+            var tasks = providers.map(function (a, i) {
                 return function () {
                     var url = a.base + '/subtitles/' + encodeURIComponent(type) + '/' + encodeURIComponent(id) + (args.length ? '/' + args.join('&') : '') + '.json';
                     return U.getJSON(url, addonMs(12000)).then(function (res) {
                         var arr = U.listOf(fromAddon(a, res, 'subtitles').subtitles, MAX_SUBTITLES);
-                        arr.forEach(function (s) { s._addon = a.manifest.name || 'Addon'; });
+                        arr.forEach(function (s, n) {
+                            s._addon = a.manifest.name || 'Addon';
+                            s._addonId = a.manifest.id || '';
+                            s._addonRank = i;
+                            s._addonPos = n;
+                        });
                         return arr;
                     });
                 };
@@ -1164,7 +1169,16 @@ var Stremio = (function () {
                         out.push(s);
                     });
                 });
-                out.sort(function (a, b) { return ('' + (a.lang || '')).localeCompare('' + (b.lang || '')); });
+                out.sort(function (a, b) {
+                    var la = '' + (a.lang || ''), lb = '' + (b.lang || '');
+                    if (la !== lb) { return la.localeCompare(lb); }
+                    function rank(s) {
+                        return (/opensubtitles.*v3/i.test((s._addonId || '') + ' ' + (s._addon || ''))) ? -1 : (s._addonRank == null ? 999 : s._addonRank);
+                    }
+                    var ra = rank(a), rb = rank(b);
+                    if (ra !== rb) { return ra - rb; }
+                    return (a._addonPos || 0) - (b._addonPos || 0);
+                });
                 return out;
             });
         });
